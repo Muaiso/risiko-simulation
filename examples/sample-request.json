@@ -1,0 +1,12 @@
+{
+  "name": "Maschinenauslastung",
+  "discountRate": 0.08,
+  "iterations": 50000,
+  "seed": 12345,
+  "cashFlows": [
+    { "year": 0, "fixedAmount": -1000000 },
+    { "year": 1, "distribution": { "type": "normal", "mu": 600000, "sigma": 50000 } },
+    { "year": 2, "distribution": { "type": "triangular", "a": 400000, "b": 900000, "c": 650000 } },
+    { "year": 3, "distribution": { "type": "lognormal", "median": 700000, "spread": 1.8 } }
+  ]
+}
