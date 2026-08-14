@@ -50,7 +50,7 @@ public class SimulationService {
      * @return vollstaendiges Analyseergebnis
      */
     public SimulationResult analyze(InvestmentProject project, int iterations, long seed) {
-        validate(project, iterations);
+        ProjectValidator.validate(project, iterations);
 
         double expectedNpv = NetPresentValueCalculator.expectedNetPresentValue(project);
 
@@ -90,19 +90,6 @@ public class SimulationService {
                 var99,
                 probLoss,
                 sensitivityView);
-    }
-
-    private void validate(InvestmentProject project, int iterations) {
-        if (iterations <= 0) {
-            throw new InvalidProjectException("Iterationen muessen > 0 sein");
-        }
-        if (iterations > 5_000_000) {
-            throw new InvalidProjectException("Iterationen dürfen 5.000.000 nicht ueberschreiten");
-        }
-        // InvestmentProject selbst validiert bereits die Struktur; hier nur Grob-Check
-        if (project.cashFlows().isEmpty()) {
-            throw new InvalidProjectException("Projekt hat keine Cashflows");
-        }
     }
 
     /**
