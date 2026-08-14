@@ -1,12 +1,9 @@
 package io.github.muaiso.risiko.web;
 
 import io.github.muaiso.risiko.domain.Distribution;
+import io.github.muaiso.risiko.domain.DistributionFactory;
 import io.github.muaiso.risiko.domain.InvestmentProject;
-import io.github.muaiso.risiko.domain.LogNormalDistribution;
-import io.github.muaiso.risiko.domain.NormalDistribution;
 import io.github.muaiso.risiko.domain.StochasticCashFlow;
-import io.github.muaiso.risiko.domain.TriangularDistribution;
-import io.github.muaiso.risiko.domain.UniformDistribution;
 import io.github.muaiso.risiko.exception.InvalidProjectException;
 
 import jakarta.validation.Valid;
@@ -113,21 +110,7 @@ public final class Dtos {
     }
 
     private static Distribution toDomainDistribution(DistributionDto d) {
-        return switch (d.type().toLowerCase()) {
-            case "normal" -> new NormalDistribution(req(d.mu, "normal.mu"), req(d.sigma, "normal.sigma"));
-            case "uniform" -> new UniformDistribution(req(d.lower, "uniform.lower"), req(d.upper, "uniform.upper"));
-            case "triangular" -> new TriangularDistribution(
-                    req(d.a, "triangular.a"), req(d.b, "triangular.b"), req(d.c, "triangular.c"));
-            case "lognormal" -> new LogNormalDistribution(
-                    req(d.median, "lognormal.median"), req(d.spread, "lognormal.spread"));
-            default -> throw new InvalidProjectException("Unbekannter Verteilungstyp: " + d.type());
-        };
-    }
-
-    private static double req(Double value, String field) {
-        if (value == null) {
-            throw new InvalidProjectException("Feld " + field + " fehlt");
-        }
-        return value;
+        return DistributionFactory.create(d.type(), d.mu(), d.sigma(), d.lower(), d.upper(),
+                d.a(), d.b(), d.c(), d.median(), d.spread());
     }
 }
