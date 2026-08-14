@@ -1,0 +1,27 @@
+# Kompilierte Klassen / Build-Output
+target/
+bin/
+build/
+out/
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.classpath
+.project
+.factorypath
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Logs
+*.log
+
+# lokale Profile / Secrets
+application-local.properties
+*.jvmopts
