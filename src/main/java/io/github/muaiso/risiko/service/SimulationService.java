@@ -5,6 +5,7 @@ import io.github.muaiso.risiko.domain.RandomSource;
 import io.github.muaiso.risiko.domain.StandardNormalRandomSource;
 import io.github.muaiso.risiko.engine.DescriptiveStatistics;
 import io.github.muaiso.risiko.engine.MonteCarloSimulator;
+import io.github.muaiso.risiko.engine.Moments;
 import io.github.muaiso.risiko.engine.NetPresentValueCalculator;
 import io.github.muaiso.risiko.engine.RiskMetrics;
 import io.github.muaiso.risiko.engine.SensitivityAnalyzer;
@@ -65,6 +66,11 @@ public class SimulationService {
         double cvar95 = RiskMetrics.conditionalValueAtRisk(npvDistribution, 95.0);
         double var99 = RiskMetrics.valueAtRisk(npvDistribution, 99.0);
         double probLoss = RiskMetrics.probabilityOfLoss(npvDistribution);
+        double sharpe = RiskMetrics.sharpeRatio(npvDistribution, 0.0);
+        double sortino = RiskMetrics.sortinoRatio(npvDistribution, 0.0);
+        double coeffVar = RiskMetrics.coefficientOfVariation(npvDistribution);
+        double skew = Moments.skewness(npvDistribution);
+        double kurtosis = Moments.excessKurtosis(npvDistribution);
 
         List<SensitivityResult> sensitivity = SensitivityAnalyzer.analyze(project);
 
@@ -89,6 +95,11 @@ public class SimulationService {
                 cvar95,
                 var99,
                 probLoss,
+                sharpe,
+                sortino,
+                coeffVar,
+                skew,
+                kurtosis,
                 sensitivityView);
     }
 
@@ -109,6 +120,11 @@ public class SimulationService {
      * @param conditionalVaR95     95 %-CVaR (Expected Shortfall)
      * @param valueAtRisk99        99 %-VaR als Verlustgroesse
      * @param probabilityOfLoss    Anteil negativer Realisierungen [0,1]
+     * @param sharpeRatio          risiko-adjustierte Rendite (Gesamtrisiko)
+     * @param sortinoRatio         risiko-adjustierte Rendite (Downside-Risiko)
+     * @param coefficientOfVariation  normierte Streuung (Stdabw/Mittel)
+     * @param skewness             Schiefe der NPV-Verteilung
+     * @param excessKurtosis       Exzess-Wölbung der NPV-Verteilung
      * @param sensitivity          Sensitivitaets-/Tornado-Ergebnisse
      */
     public record SimulationResult(
@@ -126,6 +142,11 @@ public class SimulationService {
             double conditionalVaR95,
             double valueAtRisk99,
             double probabilityOfLoss,
+            double sharpeRatio,
+            double sortinoRatio,
+            double coefficientOfVariation,
+            double skewness,
+            double excessKurtosis,
             List<SensitivityView> sensitivity) {
     }
 
