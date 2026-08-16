@@ -65,6 +65,11 @@ public class SimulationController {
                 result.conditionalVaR95(),
                 result.valueAtRisk99(),
                 result.probabilityOfLoss(),
+                result.sharpeRatio(),
+                result.sortinoRatio(),
+                result.coefficientOfVariation(),
+                result.skewness(),
+                result.excessKurtosis(),
                 sensitivity);
     }
 
