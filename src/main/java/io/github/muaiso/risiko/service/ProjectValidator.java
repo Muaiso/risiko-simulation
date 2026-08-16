@@ -38,4 +38,17 @@ public final class ProjectValidator {
             throw new InvalidProjectException("Projekt hat keine Cashflows");
         }
     }
+
+    /**
+     * Prueft nur die Projektstruktur (ohne Iterationszahl) - fuer die
+     * deterministischen Teilanalysen (Payback, Szenario).
+     *
+     * @param project das zu analysierende Projekt
+     * @throws InvalidProjectException wenn die Eingabe unzulaessig ist
+     */
+    public static void validateProjectOnly(InvestmentProject project) {
+        if (project.cashFlows().isEmpty()) {
+            throw new InvalidProjectException("Projekt hat keine Cashflows");
+        }
+    }
 }
