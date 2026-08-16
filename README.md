@@ -54,10 +54,15 @@ macht sie sichtbar:
 | NPV (deterministisch) | Erwartungswert-Kapitalwert auf Basis der Verteilungsmittel |
 | Monte-Carlo-Simulation | NPV-Verteilung über `n` Läufe (Standard 50.000) |
 | Deskriptive Statistik | Mittelwert, Standardabweichung, Min/Max, Perzentile (P5/P50/P95) |
+| Zentrale Momente | Schiefe (Skewness) und Exzess-Wölbung (Kurtosis) der Verteilung |
 | Value-at-Risk (VaR) | Verlustschranke auf 95 % / 99 % Konfidenz |
 | Conditional VaR (CVaR) | Erwarteter Schwanzverlust (Expected Shortfall) |
+| Risiko-Ratios | Sharpe Ratio, Sortino Ratio, Downside Deviation, Variationskoeffizient |
 | Verlustwahrscheinlichkeit | Anteil negativer NPV-Realisierungen |
 | Sensitivitätsanalyse | Tornado: welcher Input treibt die Unsicherheit am stärksten? |
+| Amortisationsanalyse | Diskontierte Payback-Periode (Base-Case) |
+| Szenario-Analyse | Best-/Base-/Worst-Case-NPV auf Basis der Verteilungsränder |
+| Histogramm | Fachliche Verteilungsdarstellung der NPV-Stichprobe |
 | Reproduzierbarkeit | Fester Seed → identische Simulationsergebnisse |
 
 ---
@@ -157,12 +162,35 @@ Bewertet ein Projekt und liefert die vollständige Risikoanalyse.
   "conditionalVaR95": 0.0,
   "valueAtRisk99": 0.0,
   "probabilityOfLoss": 0.012,
+  "sharpeRatio": 6.51,
+  "sortinoRatio": 9.84,
+  "coefficientOfVariation": 0.15,
+  "skewness": 0.03,
+  "excessKurtosis": -0.21,
   "sensitivity": [
     { "cashFlowIndex": 2, "year": 2, "npvAtMinimum": 540221.10, "npvAtMaximum": 1310880.44, "range": 770659.34 },
     { "cashFlowIndex": 3, "year": 3, "npvAtMinimum": 612330.55, "npvAtMaximum": 1233990.88, "range": 621660.33 },
     { "cashFlowIndex": 1, "year": 1, "npvAtMinimum": 847710.02, "npvAtMaximum": 1002527.46, "range": 154817.44 }
   ]
 }
+```
+
+### `GET /api/v1/simulations/payback`
+
+Liefert die diskontierte Amortisationsperiode (Base-Case, Erwartungswerte).
+
+**Response:**
+```json
+{ "recovered": true, "paybackYear": 2, "paybackExact": 1.67, "finalNpv": 928410.22 }
+```
+
+### `GET /api/v1/simulations/scenarios`
+
+Liefert Best-/Base-/Worst-Case-NPV auf Basis der Verteilungsränder.
+
+**Response:**
+```json
+{ "bestCaseNpv": 1988440.11, "baseCaseNpv": 928410.22, "worstCaseNpv": -131619.67 }
 ```
 
 ### Weitere Endpunkte
@@ -237,17 +265,36 @@ Für jeden stochastischen Input $i$ wird der NPV bei Minimum und Maximum von
 $i$ (alle anderen beim Erwartungswert) berechnet. Die Spannweite
 $|NPV_{max} - NPV_{min}|$ misst den Beitrag von $i$ zur Gesamtunsicherheit.
 
+### Zentrale Momente
+Schiefe (Skewness) und Exzess-Wölbung (Excess Kurtosis) beschreiben die
+Form der NPV-Verteilung:
+$$ \text{Skew} = \frac{1}{N}\sum_i \left(\frac{x_i-\mu}{\sigma}\right)^3, \quad
+\text{Kurt}_{exz} = \frac{1}{N}\sum_i \left(\frac{x_i-\mu}{\sigma}\right)^4 - 3 $$
+
+### Risiko-adjustierte Ratios
+$$ \text{Sharpe} = \frac{\mu - r_f}{\sigma}, \quad
+\text{Sortino} = \frac{\mu - r_f}{\sigma_{downside}}, \quad
+\text{CV} = \frac{\sigma}{|\mu|} $$
+mit risikofreiem Zins $r_f$ (hier 0) und Downside-Abweichung
+$\sigma_{downside} = \sqrt{\frac{1}{N}\sum ( \min(0, x_i - r_f) )^2}$.
+
+### Amortisation & Szenarien
+Die diskontierte Payback-Periode ist das (interpoliert) erste Jahr, ab dem
+die kumulierten abgezinsten Erwartungs-Cashflows nicht mehr negativ sind.
+Die Szenario-Analyse setzt alle stochastischen Inputs auf Minimum (Worst),
+Erwartungswert (Base) bzw. Maximum (Best).
+
 ---
 
 ## Tests
 
-Das Projekt enthält über 40 Unit- und Integrationstests auf allen Ebenen:
+Das Projekt enthält über 50 Unit- und Integrationstests auf allen Ebenen:
 
 - **Domain:** Verteilungs-Eigenschaften, Validierung, Diskontierung
-- **Engine:** NPV, Statistik-Perzentile, Monte-Carlo-Reproduzierbarkeit, VaR/CVaR, Sensitivität
-- **Service:** vollständige Analyse, Plausibilität, Fehlerfälle
-- **Web:** `@WebMvcTest` für Controller (Validierung, Fehlerantworten)
-- **Architektur:** `ArchitectureTest` erzwingt die Layering-Regeln
+- **Engine:** NPV, Statistik-Perzentile, Monte-Carlo-Reproduzierbarkeit, VaR/CVaR, Momente, Payback, Szenarien
+- **Service:** vollständige Analyse, Plausibilität, Fehlerfälle, Teilanalysen
+- **Web:** `@WebMvcTest` für Controller (Validierung, Fehlerantworten, neue Endpunkte)
+- **Architektur:** `LayeringTest` erzwingt die Layering-Regeln
 
 ```bash
 mvn test          # nur Tests
