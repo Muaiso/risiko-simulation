@@ -73,6 +73,11 @@ public final class Dtos {
             double conditionalVaR95,
             double valueAtRisk99,
             double probabilityOfLoss,
+            double sharpeRatio,
+            double sortinoRatio,
+            double coefficientOfVariation,
+            double skewness,
+            double excessKurtosis,
             List<SensitivityDto> sensitivity) {
     }
 
