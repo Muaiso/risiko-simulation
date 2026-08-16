@@ -8,6 +8,7 @@ import io.github.muaiso.risiko.service.SimulationService.SimulationResult;
 import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,9 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * REST-Controller fuer die Monte-Carlo Risiko-Simulation.
  *
- * <p>Einziger Endpunkt: {@code POST /api/v1/simulations}. Nimmt eine
- * Projektdefinition entgegen und liefert die vollstaendige Analyse
- * (NPV-Verteilung, Risikokennzahlen, Sensitivitaet).</p>
+ * <p>Endpunkte:
+ * <ul>
+ *   <li>{@code POST /api/v1/simulations} - vollstaendige Analyse (NPV-Verteilung, Risiko, Sensitivitaet)</li>
+ *   <li>{@code GET /api/v1/simulations/payback} - diskontierte Amortisation</li>
+ *   <li>{@code GET /api/v1/simulations/scenarios} - Best/Base/Worst-Case</li>
+ * </ul>
  */
 @RestController
 @RequestMapping("/api/v1/simulations")
@@ -44,6 +48,24 @@ public class SimulationController {
         SimulationResult result = simulationService.analyze(project, iterations, seed);
 
         return ResponseEntity.ok(toResponse(result));
+    }
+
+    @GetMapping("/payback")
+    public ResponseEntity<Dtos.PaybackResponse> payback(
+            @Valid @RequestBody Dtos.SimulationRequest request) {
+        InvestmentProject project = Dtos.toDomain(request);
+        var result = simulationService.analyzePayback(project);
+        return ResponseEntity.ok(new Dtos.PaybackResponse(
+                result.recovered(), result.paybackYear(), result.paybackExact(), result.finalNpv()));
+    }
+
+    @GetMapping("/scenarios")
+    public ResponseEntity<Dtos.ScenarioResponse> scenarios(
+            @Valid @RequestBody Dtos.SimulationRequest request) {
+        InvestmentProject project = Dtos.toDomain(request);
+        var result = simulationService.analyzeScenario(project);
+        return ResponseEntity.ok(new Dtos.ScenarioResponse(
+                result.best(), result.base(), result.worst()));
     }
 
     private Dtos.SimulationResponse toResponse(SimulationResult result) {
