@@ -7,11 +7,12 @@ import io.github.muaiso.risiko.engine.DescriptiveStatistics;
 import io.github.muaiso.risiko.engine.MonteCarloSimulator;
 import io.github.muaiso.risiko.engine.Moments;
 import io.github.muaiso.risiko.engine.NetPresentValueCalculator;
+import io.github.muaiso.risiko.engine.PaybackAnalyzer;
 import io.github.muaiso.risiko.engine.RiskMetrics;
+import io.github.muaiso.risiko.engine.ScenarioAnalyzer;
 import io.github.muaiso.risiko.engine.SensitivityAnalyzer;
 import io.github.muaiso.risiko.engine.SensitivityAnalyzer.SensitivityResult;
 import io.github.muaiso.risiko.exception.InvalidProjectException;
-
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -163,5 +164,28 @@ public class SimulationService {
      */
     public record SensitivityView(
             int cashFlowIndex, int year, double npvAtMinimum, double npvAtMaximum, double range) {
+    }
+
+    /**
+     * Diskontierte Amortisationsanalyse eines Projekts (Base-Case mit
+     * Erwartungswerten der stochastischen Cashflows).
+     *
+     * @param project das zu analysierende Projekt
+     * @return Ergebnis der Amortisationsanalyse
+     */
+    public PaybackAnalyzer.PaybackResult analyzePayback(InvestmentProject project) {
+        ProjectValidator.validateProjectOnly(project);
+        return PaybackAnalyzer.analyze(project);
+    }
+
+    /**
+     * Szenario-Analyse (Best/Base/Worst-Case) eines Projekts.
+     *
+     * @param project das zu analysierende Projekt
+     * @return Ergebnis der Szenario-Analyse
+     */
+    public ScenarioAnalyzer.ScenarioResult analyzeScenario(InvestmentProject project) {
+        ProjectValidator.validateProjectOnly(project);
+        return ScenarioAnalyzer.analyze(project);
     }
 }
