@@ -53,7 +53,38 @@ class SimulationControllerWebTest {
                 .andExpect(jsonPath("$.iterations").value(2000))
                 .andExpect(jsonPath("$.expectedNpv").exists())
                 .andExpect(jsonPath("$.valueAtRisk95").exists())
+                .andExpect(jsonPath("$.sharpeRatio").exists())
+                .andExpect(jsonPath("$.sortinoRatio").exists())
+                .andExpect(jsonPath("$.coefficientOfVariation").exists())
+                .andExpect(jsonPath("$.skewness").exists())
+                .andExpect(jsonPath("$.excessKurtosis").exists())
                 .andExpect(jsonPath("$.sensitivity").isArray());
+    }
+
+    @Test
+    void postSimulationReturnsExtendedMetrics() throws Exception {
+        String body = """
+                {
+                  "name": "Erweitert",
+                  "discountRate": 0.08,
+                  "iterations": 4000,
+                  "seed": 777,
+                  "cashFlows": [
+                    { "year": 0, "fixedAmount": -1000 },
+                    { "year": 1, "distribution": { "type": "normal", "mu": 600, "sigma": 50 } },
+                    { "year": 2, "distribution": { "type": "normal", "mu": 600, "sigma": 50 } }
+                  ]
+                }
+                """;
+        mockMvc.perform(post("/api/v1/simulations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.sharpeRatio").isNumber())
+                .andExpect(jsonPath("$.sortinoRatio").isNumber())
+                .andExpect(jsonPath("$.coefficientOfVariation").isNumber())
+                .andExpect(jsonPath("$.skewness").isNumber())
+                .andExpect(jsonPath("$.excessKurtosis").isNumber());
     }
 
     @Test
