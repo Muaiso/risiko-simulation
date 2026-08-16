@@ -90,6 +90,21 @@ public final class Dtos {
             double range) {
     }
 
+    /** Antwort: diskontierte Amortisationsanalyse. */
+    public record PaybackResponse(
+            boolean recovered,
+            int paybackYear,
+            double paybackExact,
+            double finalNpv) {
+    }
+
+    /** Antwort: Szenario-Analyse (Best/Base/Worst-Case). */
+    public record ScenarioResponse(
+            double bestCaseNpv,
+            double baseCaseNpv,
+            double worstCaseNpv) {
+    }
+
     /**
      * Uebersetzt die Anfrage in ein fachliches {@link InvestmentProject}.
      *
