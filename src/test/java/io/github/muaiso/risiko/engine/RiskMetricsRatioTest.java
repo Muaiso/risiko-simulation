@@ -13,9 +13,10 @@ class RiskMetricsRatioTest {
 
     @Test
     void sharpeRatioUsesMeanOverStd() {
-        // symmetrisch um 100, Std = 50 -> (100-0)/50 = 2
+        // symmetrisch um 100, Populations-Std = sqrt(5000/3) ~= 40.8248
         double[] values = {50, 100, 150};
-        assertEquals(2.0, RiskMetrics.sharpeRatio(values, 0.0), 1e-9);
+        double expected = 100.0 / Math.sqrt(5000.0 / 3.0);
+        assertEquals(expected, RiskMetrics.sharpeRatio(values, 0.0), 1e-9);
     }
 
     @Test
@@ -44,9 +45,10 @@ class RiskMetricsRatioTest {
 
     @Test
     void coefficientOfVariationIsNormalized() {
-        // Mittel 100, Std 20 -> CV 0.2
+        // Mittel 100, Populations-Std = sqrt(800/3) ~= 16.3299 -> CV ~0.1633
         double[] values = {80, 100, 120};
-        assertEquals(0.2, RiskMetrics.coefficientOfVariation(values), 1e-9);
+        double expected = Math.sqrt(800.0 / 3.0) / 100.0;
+        assertEquals(expected, RiskMetrics.coefficientOfVariation(values), 1e-9);
     }
 
     @Test
