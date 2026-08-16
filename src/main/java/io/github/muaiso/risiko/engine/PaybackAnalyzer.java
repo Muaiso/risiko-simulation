@@ -35,7 +35,6 @@ public final class PaybackAnalyzer {
         double paybackExact = Double.POSITIVE_INFINITY;
 
         double prevCumulative = 0.0;
-        double prevDiscounted = 0.0;
         int prevYear = 0;
 
         for (StochasticCashFlow cf : project.cashFlows()) {
@@ -50,14 +49,13 @@ public final class PaybackAnalyzer {
                 paybackYear = cf.year();
                 // lineare Interpolation zwischen Vorjahr (negativ) und Jetzt (positiv)
                 if (prevCumulative < 0.0) {
-                    double frac = -prevCumulative / (dcf - prevDiscounted <= 0.0 ? 1.0 : (dcf - prevDiscounted));
+                    double frac = -prevCumulative / (cumulative - prevCumulative);
                     paybackExact = prevYear + frac;
                 } else {
                     paybackExact = (double) cf.year();
                 }
             }
             prevCumulative = cumulative;
-            prevDiscounted = dcf;
             prevYear = cf.year();
         }
 
